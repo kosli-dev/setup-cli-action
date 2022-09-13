@@ -43,7 +43,7 @@ The actions supports the following inputs:
 
 ```yaml
 jobs:
-  login:
+  example:
     runs-on: ubuntu-latest
     env:
       KOSLI_API_TOKEN: ${{ secrets.MY_MERKELY_API_TOKEN }}
