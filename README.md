@@ -15,14 +15,15 @@ Setup the `kosli` CLI:
 
 ```yaml
 steps:
-- uses: kosli-dev/setup-kosli-cli
+- uses: kosli-dev/setup-cli-action@v1
 ```
 
 A specific version of the `kosli` CLI can be installed:
 
 ```yaml
 steps:
-- uses: kosli-dev/setup-kosli-cli
+- name: setup-kosli-cli
+  uses: kosli-dev/setup-cli-action@v1
   with:
     version:
       0.1.10
@@ -50,7 +51,7 @@ jobs:
       KOSLI_OWNER: my-org
     steps:
       - name: Setup kosli
-        uses: kosli-dev/setup-kosli-cli@v1
+        uses: kosli-dev/setup-cli-action@v1
       - name: declare pipeline
         run: |
           kosli pipeline declare --pipeline my-pipeline -t pull-request,artifact,test
