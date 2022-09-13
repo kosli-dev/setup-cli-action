@@ -10,11 +10,12 @@ async function setup() {
     const platform = os.platform();
     const arch = os.arch();
     const downloadUrl = getDownloadUrl({ version, platform, arch });
+    console.log(`installing Kosli CLI from ${downloadUrl} ...`);
 
     const pathToTarball = await tc.downloadTool(downloadUrl);
-
     const pathToCLI = await tc.extractTar(pathToTarball);
     core.addPath(pathToCLI);
+    console.log(`installed Kosli CLI to ${pathToCLI}!`);
   } catch (e) {
     core.setFailed(e);
   }
