@@ -1,10 +1,10 @@
-name: setup-merkely-cli
-description: Install the merkely CLI on Github Actions runners
+name: setup-kosli-cli
+description: Install the Kosli CLI on Github Actions runners
 inputs:
   version:
-    description: Version of merkely CLI
+    description: Version of Kosli CLI
     required: false
-    default: 1.5.1
+    default: 0.1.15
 runs:
-  using: node12
+  using: node16
   main: src/index.js

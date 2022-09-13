@@ -1,7 +1,7 @@
 {
-  "name": "setup-merkely-cli",
+  "name": "setup-kosli-cli",
   "version": "1.0.0",
-  "description": "Sets up the Merkely CLI for GitHub Actions runners",
+  "description": "Sets up the Kosli CLI for GitHub Actions runners",
   "main": "dist/index.js",
   "scripts": {
     "test": "ava",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stacc/setup-merkely-cli.git"
+    "url": "git+https://github.com/kosli-dev/setup-cli-action.git"
   },
-  "author": "sky@stacc.com",
+  "author": "mike@kosli.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/stacc/setup-merkely-cli/issues"
+    "url": "https://github.com/kosli-dev/setup-cli-action/issues"
   },
-  "homepage": "https://github.com/stacc/setup-merkely-cli#readme",
+  "homepage": "https://kosli.com",
   "dependencies": {
     "@actions/core": "^1.8.2",
     "@actions/github": "^5.0.3",
@@ -24,5 +24,9 @@
   },
   "devDependencies": {
     "ava": "^4.3.0"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": []
 }

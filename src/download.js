@@ -23,9 +23,9 @@ function mapOS(os) {
 }
 
 function getDownloadUrl({ version, platform, arch }) {
-  const filename = `merkely_${version}_${mapOS(platform)}_${mapArch(arch)}`;
+  const filename = `kosli_${version}_${mapOS(platform)}_${mapArch(arch)}`;
   const extension = platform === "win32" ? "zip" : "tar.gz";
-  return `https://github.com/merkely-development/cli/releases/download/v${version}/${filename}.${extension}`;
+  return `https://github.com/kosli-dev/cli/releases/download/v${version}/${filename}.${extension}`;
 }
 
 module.exports = { getDownloadUrl };

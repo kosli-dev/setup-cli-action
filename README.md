@@ -1,46 +1,43 @@
-# `setup-merkely-cli`
+# `setup-kosli-cli`
 
-> Sets up the Merkely CLI for GitHub Actions runners
+> Sets up the Kosli CLI for GitHub Actions runners
 
 ## About
 
-This action sets up the Merkely CLI, [`merkely`](https://github.com/merkely-development/cli), on GitHub's hosted Actions runners.
+This action sets up the [Kosli](https://kosli.com) [CLI](https://github.com/kosli-dev/cli), on GitHub's hosted Actions runners.
 
-This action can be run on `ubuntu-latest`, `windows-latest`, and `macos-latest` GitHub Actions runners, and will install and expose a specified version of the `merkely` CLI on the runner environment.
+This action can be run on `ubuntu-latest`, `windows-latest`, and `macos-latest` GitHub Actions runners, 
+and will install and expose a specified version of the `kosli` CLI on the runner environment.
 
 ## Usage
 
-Setup the `merkely` CLI:
+Setup the `kosli` CLI:
 
 ```yaml
 steps:
-- uses: stacc/setup-merkely-cli
+- uses: kosli-dev/setup-kosli-cli
 ```
 
-A specific version of the `merkely` CLI can be installed:
+A specific version of the `kosli` CLI can be installed:
 
 ```yaml
 steps:
-- uses: stacc/setup-merkely-cli
+- uses: kosli-dev/setup-kosli-cli
   with:
     version:
-      0.6.0
+      0.1.10
 ```
 
 ## Inputs
 
 The actions supports the following inputs:
 
-- `version`: The version of `merkely` to install, defaulting to `1.5.1`
+- `version`: The version of `kosli` to install, defaulting to `0.1.15`
 
 ## Environment variables
 
-- MERKELY_API_TOKEN: set the Merkely API token.
-- MERKELY_OWNER: set the Merkely Pipeline Owner.
-- MERKELY_HOST: set the Merkely host.
-- MERKELY_DRY_RUN: indicate whether or not Merkely CLI is running in Dry Run mode.
-- MERKELY_MAX_API_RETRIES: set the maximum number of API calling retries when the API host is not reachable.
-- MERKELY_CONFIG_FILE: set the path to Merkely config file where you can set your options.
+- KOSLI_API_TOKEN: set the Kosli API token.
+- KOSLI_OWNER: set the Kosli Pipeline Owner.
 
 ## Example job
 
@@ -49,14 +46,14 @@ jobs:
   login:
     runs-on: ubuntu-latest
     env:
-      MERKELY_API_TOKEN: ${{ secrets.MY_MERKELY_API_TOKEN }}
-      MERKELY_OWNER: my-org
+      KOSLI_API_TOKEN: ${{ secrets.MY_MERKELY_API_TOKEN }}
+      KOSLI_OWNER: my-org
     steps:
-      - name: Setup merkely
-        uses: stacc/setup-merkely-cli@v1
+      - name: Setup kosli
+        uses: kosli-dev/setup-kosli-cli@v1
       - name: declare pipeline
         run: |
-          merkely pipeline declare --pipeline my-pipeline -t pull-request,artifact,test
+          kosli pipeline declare --pipeline my-pipeline -t pull-request,artifact,test
 ```
 
 ## License
