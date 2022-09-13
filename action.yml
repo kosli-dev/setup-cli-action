@@ -5,6 +5,9 @@ inputs:
     description: Version of Kosli CLI
     required: false
     default: 0.1.15
+branding:
+  icon: 'download-cloud'  
+  color: 'blue'
 runs:
   using: node16
   main: src/index.js
