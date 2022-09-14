@@ -47,7 +47,7 @@ jobs:
   example:
     runs-on: ubuntu-latest
     env:
-      KOSLI_API_TOKEN: ${{ secrets.MY_MERKELY_API_TOKEN }}
+      KOSLI_API_TOKEN: ${{ secrets.MY_KOSLI_API_TOKEN }}
       KOSLI_OWNER: my-org
     steps:
       - name: Setup kosli
