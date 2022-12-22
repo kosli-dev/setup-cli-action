@@ -15,7 +15,7 @@ async function setup() {
     const pathToTarball = await tc.downloadTool(downloadUrl);
     const pathToCLI = await tc.extractTar(pathToTarball);
     core.addPath(pathToCLI);
-    console.log(`installed Kosli CLI to ${pathToCLI}!`);
+    console.log(`installed Kosli CLI v${version} to ${pathToCLI}`);
   } catch (e) {
     core.setFailed(e);
   }
