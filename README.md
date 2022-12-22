@@ -33,7 +33,7 @@ steps:
 
 The actions supports the following inputs:
 
-- `version`: The version of `kosli` to install, defaulting to `0.1.15`
+- `version`: The version of `kosli` to install, defaulting to `0.1.27`
 
 ## Environment variables
 
