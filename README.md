@@ -15,7 +15,7 @@ Setup the `kosli` CLI:
 
 ```yaml
 steps:
-- uses: kosli-dev/setup-cli-action@v1
+- uses: kosli-dev/setup-cli-action@v2
 ```
 
 A specific version of the `kosli` CLI can be installed:
@@ -23,22 +23,22 @@ A specific version of the `kosli` CLI can be installed:
 ```yaml
 steps:
 - name: setup-kosli-cli
-  uses: kosli-dev/setup-cli-action@v1
+  uses: kosli-dev/setup-cli-action@v2
   with:
     version:
-      0.1.30
+      2.0.0-rc1
 ```
 
 ## Inputs
 
 The actions supports the following inputs:
 
-- `version`: The version of `kosli` to install, defaulting to `0.1.41`
+- `version`: The version of `kosli` to install, defaulting to `2.0.0-rc1`
 
 ## Environment variables
 
 - KOSLI_API_TOKEN: set the Kosli API token.
-- KOSLI_OWNER: set the Kosli Pipeline Owner.
+- KOSLI_ORG: set the Kosli Pipeline Owner.
 
 ## Example job
 
@@ -48,13 +48,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KOSLI_API_TOKEN: ${{ secrets.MY_KOSLI_API_TOKEN }}
-      KOSLI_OWNER: my-org
+      KOSLI_ORG: my-org
     steps:
       - name: Setup kosli
-        uses: kosli-dev/setup-cli-action@v1
-      - name: declare pipeline
+        uses: kosli-dev/setup-cli-action@v2
+      - name: create flow
         run: |
-          kosli pipeline declare --pipeline my-pipeline -t pull-request,artifact,test
+          kosli create flow my-flow -t artifact,test,pull-request
 ```
 
 ## License
