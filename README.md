@@ -26,14 +26,14 @@ steps:
   uses: kosli-dev/setup-cli-action@v2
   with:
     version:
-      2.0.0
+      2.2.0
 ```
 
 ## Inputs
 
 The actions supports the following inputs:
 
-- `version`: The version of `kosli` to install, defaulting to `2.0.0`
+- `version`: The version of `kosli` to install, defaulting to `2.2.0`
 
 ## Environment variables
 
