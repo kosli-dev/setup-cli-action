@@ -38,7 +38,7 @@ The actions supports the following inputs:
 ## Environment variables
 
 - KOSLI_API_TOKEN: set the Kosli API token.
-- KOSLI_ORG: set the Kosli Pipeline Owner.
+- KOSLI_ORG: set the Kosli Flow Org.
 
 ## Example job
 
