@@ -26,7 +26,7 @@ steps:
   uses: kosli-dev/setup-cli-action@v2
   with:
     version:
-      2.2.0
+      2.3.4
 ```
 
 ## Inputs
