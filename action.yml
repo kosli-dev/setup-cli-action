@@ -4,10 +4,10 @@ inputs:
   version:
     description: Version of Kosli CLI
     required: false
-    default: 2.3.4
+    default: 2.7.6
 branding:
   icon: 'download-cloud'  
   color: 'blue'
 runs:
-  using: node16
+  using: node20
   main: src/index.js
