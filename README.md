@@ -26,14 +26,14 @@ steps:
   uses: kosli-dev/setup-cli-action@v2
   with:
     version:
-      2.10.11
+      2.11.2
 ```
 
 ## Inputs
 
 The actions supports the following inputs:
 
-- `version`: The version of `kosli` to install, defaulting to `2.10.11`
+- `version`: The version of `kosli` to install, defaulting to `2.11.2`
 
 ## Environment variables
 
@@ -52,6 +52,9 @@ jobs:
     steps:
       - name: Setup kosli
         uses: kosli-dev/setup-cli-action@v2
+        # uncomment below to install a specific version
+        # with: 
+        #   version: 2.11.2
       - name: create flow
         run: |
           kosli create flow my-flow -t artifact,test,pull-request
