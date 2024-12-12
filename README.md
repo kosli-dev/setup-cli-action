@@ -57,7 +57,7 @@ jobs:
         #   version: 2.11.2
       - name: create flow
         run: |
-          kosli create flow my-flow -t artifact,test,pull-request
+          kosli create flow my-flow --use-empty-template
 ```
 
 ## License
