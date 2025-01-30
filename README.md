@@ -43,21 +43,35 @@ The actions supports the following inputs:
 ## Example job
 
 ```yaml
-jobs:
-  example:
+env: 
+  KOSLI_DRY_RUN: ${{ vars.KOSLI_DRY_RUN }}  # false
+  KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+  KOSLI_ORG: my-org
+  KOSLI_FLOW: my-flow
+  KOSLI_TRAIL: ${{ github.sha }}
+  
+jobs:  
+  build-image:
     runs-on: ubuntu-latest
-    env:
-      KOSLI_API_TOKEN: ${{ secrets.MY_KOSLI_API_TOKEN }}
-      KOSLI_ORG: my-org
     steps:
+      - ...
+        
+      - name: Build and push Docker image to ECR
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          ...
+      
       - name: Setup kosli
         uses: kosli-dev/setup-cli-action@v2
         # uncomment below to install a specific version
         # with: 
-        #   version: 2.11.2
-      - name: create flow
-        run: |
-          kosli create flow my-flow --use-empty-template
+        #   version: 2.11.5
+        
+      - name: Attest artifact provenance
+        run: 
+          kosli attest artifact "${IMAGE_NAME}" --artifact-type=oci
 ```
 
 ## License
