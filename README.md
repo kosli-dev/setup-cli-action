@@ -44,6 +44,7 @@ The actions supports the following inputs:
 
 ```yaml
 env: 
+  KOSLI_DRY_RUN: ${{ vars.KOSLI_DRY_RUN }}  # false
   KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
   KOSLI_ORG: my-org
   KOSLI_FLOW: my-flow
