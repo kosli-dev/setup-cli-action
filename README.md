@@ -33,14 +33,10 @@ steps:
 
 The actions supports the following inputs:
 
-- `version`: The version of `kosli` to install, defaulting to `2.11.0`
-
-## Environment variables
-
-- KOSLI_API_TOKEN: set the Kosli API token.
-- KOSLI_ORG: set the Kosli Flow Org.
+- `version`: The version of `kosli` to install, defaulting to `2.11.5`
 
 ## Example job
+See [Kosli CLI documentation](https://docs.kosli.com/)
 
 ```yaml
 env: 
@@ -67,7 +63,7 @@ jobs:
         uses: kosli-dev/setup-cli-action@v2
         # uncomment below to install a specific version
         # with: 
-        #   version: 2.11.5
+        #   version: 2.11.3
         
       - name: Attest artifact provenance
         run: 
