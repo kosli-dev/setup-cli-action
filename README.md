@@ -61,11 +61,8 @@ jobs:
       
       - name: Setup kosli
         uses: kosli-dev/setup-cli-action@v2
-        # uncomment below to install a specific version
-        # with: 
-        #   version: 2.11.3
         
-      - name: Attest artifact provenance
+      - name: Attest ECR image provenance
         run: 
           kosli attest artifact "${IMAGE_NAME}" --artifact-type=oci
 ```
