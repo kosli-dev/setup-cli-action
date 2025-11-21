@@ -4,7 +4,7 @@ inputs:
   version:
     description: Version of Kosli CLI
     required: false
-    default: 2.11.27
+    default: 2.11.32
 branding:
   icon: 'download-cloud'  
   color: 'blue'
