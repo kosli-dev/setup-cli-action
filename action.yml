@@ -6,8 +6,8 @@ inputs:
     required: false
     default: 2.11.32
 branding:
-  icon: 'download-cloud'  
-  color: 'blue'
+  icon: download-cloud
+  color: blue
 runs:
   using: node20
-  main: src/index.js
+  main: dist/index.js
