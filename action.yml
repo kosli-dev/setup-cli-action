@@ -9,5 +9,5 @@ branding:
   icon: 'download-cloud'  
   color: 'blue'
 runs:
-  using: node20
+  using: node24
   main: src/index.js
