@@ -2,9 +2,16 @@ name: setup-kosli-cli
 description: Install the Kosli CLI on Github Actions runners
 inputs:
   version:
-    description: Version of Kosli CLI
+    description: Version of Kosli CLI. Use `latest` to install the newest release from GitHub.
     required: false
     default: 2.11.43
+  github-token:
+    description: Token used to authenticate GitHub API calls when resolving `latest`.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  version:
+    description: The resolved Kosli CLI version that was installed.
 branding:
   icon: 'download-cloud'
   color: 'blue'

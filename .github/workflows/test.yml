@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        version: [2.11.27]
+        version: [2.11.27, latest]
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -27,6 +27,7 @@ jobs:
         run: npm ci && npm run build
 
       - name: Setup kosli CLI
+        id: setup
         uses: ./
         with:
           version: ${{ matrix.version }}
@@ -38,7 +39,8 @@ jobs:
           kosli version --short >> $GITHUB_ENV
           echo "\n" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
-      - name: Verify
+      - name: Verify pinned version
+        if: matrix.version != 'latest'
         shell: python
         env:
           KOSLI_VERSION_EXPECTED: ${{ matrix.version }}
@@ -47,3 +49,18 @@ jobs:
           sys.exit(
               int(not os.environ["KOSLI_VERSION_EXPECTED"] in os.environ["KOSLI_VERSION_INSTALLED"])
           )
+      - name: Verify latest resolved to a semver
+        if: matrix.version == 'latest'
+        shell: python
+        env:
+          KOSLI_VERSION_RESOLVED: ${{ steps.setup.outputs.version }}
+        run: |
+          import os, re, sys
+          installed = os.environ["KOSLI_VERSION_INSTALLED"].strip()
+          resolved = os.environ["KOSLI_VERSION_RESOLVED"].strip()
+          if not re.match(r"^\d+\.\d+\.\d+", resolved):
+              print(f"resolved version {resolved!r} does not look like semver")
+              sys.exit(1)
+          if resolved not in installed:
+              print(f"resolved {resolved!r} not found in installed {installed!r}")
+              sys.exit(1)

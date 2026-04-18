@@ -1,4 +1,5 @@
 const path = require("path");
+const github = require("@actions/github");
 
 // Map node arch to arch in download url
 // arch in [arm, x32, x64...] (https://nodejs.org/api/os.html#os_os_arch)
@@ -28,4 +29,22 @@ function getDownloadUrl({ version, platform, arch }) {
   return `https://github.com/kosli-dev/cli/releases/download/v${version}/${filename}.${extension}`;
 }
 
-module.exports = { getDownloadUrl };
+async function resolveVersion(version, token, octokit) {
+  if (version !== "latest") {
+    return version;
+  }
+  const client = octokit || github.getOctokit(token);
+  let release;
+  try {
+    release = await client.rest.repos.getLatestRelease({
+      owner: "kosli-dev",
+      repo: "cli"
+    });
+  } catch (e) {
+    throw new Error(`failed to resolve latest Kosli CLI version from GitHub: ${e.message}`);
+  }
+  const tag = release.data.tag_name;
+  return tag.startsWith("v") ? tag.slice(1) : tag;
+}
+
+module.exports = { getDownloadUrl, resolveVersion };
