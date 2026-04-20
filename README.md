@@ -11,7 +11,7 @@ and will install and expose a specified version of the `kosli` CLI on the runner
 
 ## Usage
 
-Setup the `kosli` CLI:
+Setup the `kosli` CLI (installs the latest release by default):
 
 ```yaml
 steps:
@@ -25,15 +25,29 @@ steps:
 - name: setup-kosli-cli
   uses: kosli-dev/setup-cli-action@v3
   with:
-    version:
-      2.11.43
+    version: 2.11.43
+```
+
+To explicitly pin to the newest published release at runtime, pass `latest`:
+
+```yaml
+steps:
+- name: setup-kosli-cli
+  uses: kosli-dev/setup-cli-action@v3
+  with:
+    version: latest
 ```
 
 ## Inputs
 
-The actions supports the following inputs:
+The action supports the following inputs:
 
-- `version`: The version of `kosli` to install, defaulting to `2.11.43`
+- `version`: The version of `kosli` to install. Accepts a semver (e.g. `2.11.43`) or the alias `latest`, which resolves to the newest GitHub release of `kosli-dev/cli` at runtime. Defaults to `latest`.
+- `github-token`: Token used to authenticate the GitHub API call that resolves `latest`. Defaults to `${{ github.token }}`; normally you do not need to set this.
+
+## Outputs
+
+- `version`: The resolved `kosli` CLI version that was installed. When `version: latest` is used, this will contain the concrete semver (e.g. `2.12.0`) and can be referenced by later steps via `steps.<id>.outputs.version`.
 
 ## Example job
 See [Kosli CLI documentation](https://docs.kosli.com/)
