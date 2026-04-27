@@ -1,5 +1,5 @@
-const test = require("ava");
-const { getDownloadUrl, resolveVersion } = require("../src/download");
+import test from "ava";
+import { getDownloadUrl, resolveVersion } from "../src/download.js";
 
 const baseUrl = "https://github.com/kosli-dev/cli/releases/download/";
 const testCases = [

@@ -2,6 +2,7 @@
   "name": "setup-kosli-cli",
   "version": "1.0.0",
   "description": "Sets up the Kosli CLI for GitHub Actions runners",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "test": "ava",
