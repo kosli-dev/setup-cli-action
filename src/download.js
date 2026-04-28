@@ -1,5 +1,4 @@
-const path = require("path");
-const github = require("@actions/github");
+import * as github from "@actions/github";
 
 // Map node arch to arch in download url
 // arch in [arm, x32, x64...] (https://nodejs.org/api/os.html#os_os_arch)
@@ -23,13 +22,13 @@ function mapOS(os) {
   return mappings[os] || os;
 }
 
-function getDownloadUrl({ version, platform, arch }) {
+export function getDownloadUrl({ version, platform, arch }) {
   const filename = `kosli_${version}_${mapOS(platform)}_${mapArch(arch)}`;
   const extension = platform === "win32" ? "zip" : "tar.gz";
   return `https://github.com/kosli-dev/cli/releases/download/v${version}/${filename}.${extension}`;
 }
 
-async function resolveVersion(version, token, octokit) {
+export async function resolveVersion(version, token, octokit) {
   if (version !== "latest") {
     return version;
   }
@@ -46,5 +45,3 @@ async function resolveVersion(version, token, octokit) {
   const tag = release.data.tag_name;
   return tag.startsWith("v") ? tag.slice(1) : tag;
 }
-
-module.exports = { getDownloadUrl, resolveVersion };

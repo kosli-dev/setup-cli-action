@@ -1,8 +1,7 @@
-const path = require("path");
-const os = require("os");
-const core = require("@actions/core");
-const tc = require("@actions/tool-cache");
-const { getDownloadUrl, resolveVersion } = require("./download");
+import os from "os";
+import * as core from "@actions/core";
+import * as tc from "@actions/tool-cache";
+import { getDownloadUrl, resolveVersion } from "./download.js";
 
 async function setup() {
   try {
@@ -32,8 +31,4 @@ async function setup() {
   }
 }
 
-module.exports = setup;
-
-if (require.main === module) {
-  setup();
-}
+setup();
