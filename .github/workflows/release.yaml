@@ -1,11 +1,12 @@
 name: Release
 
 # Triggered by pushing a semver tag (e.g. v2.1.3, v2.1.3-beta.1).
-# Creates a GitHub Release with auto-generated notes. Marks it as prerelease
-# if the tag contains a hyphen.
-#
-# Publishing the release fires the "Build and Tag" workflow,
-# which builds dist/ and updates the version refs.
+# 1. Builds dist/ locally.
+# 2. Creates a GitHub Release with auto-generated notes,
+#    marked as prerelease if the tag has a "-suffix".
+# 3. Force-pushes dist/ onto the tag.
+# 4. For stable releases only, also updates the rolling major/minor refs
+#    (v2.1.3 -> v2 and v2.1).
 on:
   push:
     tags:
@@ -27,17 +28,53 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Detect prerelease
+        id: meta
+        run: echo "prerelease=${{ contains(github.ref_name, '-') }}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install deps and build
+        run: npm ci && npm run build
+
       - name: Create GitHub Release with auto-generated notes
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
-          # Mark as prerelease if the tag contains a hyphen (e.g. v2.1.3-beta.1).
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ steps.meta.outputs.prerelease }}
+
+      # Stable releases: build-and-tag-action pushes dist/ to the tag
+      # AND updates the rolling v<major> and v<major>.<minor> refs.
+      - name: Build and tag (stable releases)
+        if: steps.meta.outputs.prerelease == 'false'
+        uses: JasonEtco/build-and-tag-action@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # Prereleases: only push dist/ to the tag, don't touch major/minor refs.
+      - name: Push dist/ to tag (prereleases)
+        if: steps.meta.outputs.prerelease == 'true'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/
+          git commit -m "build: dist for ${TAG}"
+          git tag -f "${TAG}"
+          git push origin -f "refs/tags/${TAG}"
 
   notify-finish:
     needs: [notify-start, release]
