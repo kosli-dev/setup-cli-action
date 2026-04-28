@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   notify-finish:
-    needs: [notify-start, build]
+    needs: [notify-start, release]
     if: always() && needs.notify-start.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -62,7 +62,7 @@ jobs:
       - name: Determine status
         id: status
         run: |
-          if [[ "${{ needs.build.result }}" == "success" ]]; then
+          if [[ "${{ needs.release.result }}" == "success" ]]; then
             echo "value=success" >> "$GITHUB_OUTPUT"
           else
             echo "value=failure" >> "$GITHUB_OUTPUT"
