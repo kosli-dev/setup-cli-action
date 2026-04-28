@@ -5,7 +5,8 @@ name: Release
 # 2. Builds dist/ and force-pushes action.yml + dist/ to the tag.
 # 3. Updates the major version tag (v2.1.3 -> v2).
 on:
-  tags:
+  push:
+    tags:
       - 'v*.*.*'
 
 permissions:
