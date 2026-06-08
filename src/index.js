@@ -2,6 +2,7 @@ import os from "os";
 import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
 import { getDownloadUrl, resolveVersion } from "./download.js";
+import { withRetries } from "./retry.js";
 
 async function setup() {
   try {
@@ -10,13 +11,21 @@ async function setup() {
     const platform = os.platform();
     const arch = os.arch();
 
-    const resolvedVersion = await resolveVersion(version, token);
+    const resolvedVersion = version === "latest"
+      ? await withRetries(
+          () => resolveVersion(version, token),
+          { onRetry: logRetry("resolving latest version") }
+        )
+      : version;
 
     let pathToCLI = tc.find("kosli", resolvedVersion);
     if (!pathToCLI) {
       const downloadUrl = getDownloadUrl({ version: resolvedVersion, platform, arch });
       console.log(`installing Kosli CLI from ${downloadUrl} ...`);
-      const pathToTarball = await tc.downloadTool(downloadUrl);
+      const pathToTarball = await withRetries(
+        () => tc.downloadTool(downloadUrl),
+        { onRetry: logRetry("downloading Kosli CLI") }
+      );
       const extracted = await tc.extractTar(pathToTarball);
       pathToCLI = await tc.cacheDir(extracted, "kosli", resolvedVersion);
     } else {
@@ -29,6 +38,14 @@ async function setup() {
   } catch (e) {
     core.setFailed(e);
   }
+}
+
+function logRetry(label) {
+  return ({ attempt, retries, delayMs, error }) => {
+    core.warning(
+      `${label} failed (attempt ${attempt}/${retries}): ${error.message}. Retrying in ${delayMs}ms.`
+    );
+  };
 }
 
 setup();
