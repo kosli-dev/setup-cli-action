@@ -1,9 +1,11 @@
+// ECONNRESET / ETIMEDOUT / EAI_AGAIN / EPIPE are clearly transient.
+// ENOTFOUND and ECONNREFUSED are deliberately excluded - the download URL is
+// hardcoded by this action, so those codes indicate a hard GitHub outage or
+// DNS-wide failure where retrying just delays the inevitable.
 const TRANSIENT_NETWORK_CODES = new Set([
   "ECONNRESET",
   "ETIMEDOUT",
-  "ENOTFOUND",
   "EAI_AGAIN",
-  "ECONNREFUSED",
   "EPIPE"
 ]);
 
@@ -37,12 +39,15 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Defaults are tuned to stack on top of @actions/tool-cache's own internal
+// retries (3 attempts, ~10-20s waits) without ballooning total time-to-fail.
+// With these defaults the outer layer adds at most ~14s of jittered waits.
 export async function withRetries(fn, options = {}) {
   const {
-    retries = 5,
+    retries = 3,
     baseDelayMs = 2000,
     factor = 2,
-    maxDelayMs = 60000,
+    maxDelayMs = 15000,
     shouldRetry = isTransientError,
     onRetry = () => {},
     sleeper = sleep,

@@ -93,8 +93,14 @@ test("isTransientError identifies HTTP 5xx, 429, 408", t => {
 test("isTransientError identifies Node network error codes", t => {
   t.true(isTransientError({ code: "ECONNRESET" }));
   t.true(isTransientError({ code: "ETIMEDOUT" }));
-  t.true(isTransientError({ code: "ENOTFOUND" }));
+  t.true(isTransientError({ code: "EAI_AGAIN" }));
+  t.true(isTransientError({ code: "EPIPE" }));
   t.false(isTransientError({ code: "EACCES" }));
+});
+
+test("isTransientError excludes ENOTFOUND and ECONNREFUSED (treated as hard failures)", t => {
+  t.false(isTransientError({ code: "ENOTFOUND" }));
+  t.false(isTransientError({ code: "ECONNREFUSED" }));
 });
 
 test("isTransientError matches HTTP response codes in error messages", t => {
