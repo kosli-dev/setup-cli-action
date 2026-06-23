@@ -98,6 +98,7 @@ function fakeReleasesOctokit(releases) {
 }
 
 const releaseFixture = [
+  { tag_name: "v10.0.0", draft: false, prerelease: false },
   { tag_name: "v3.0.0", draft: false, prerelease: false },
   { tag_name: "v2.28.0-rc.1", draft: false, prerelease: true },
   { tag_name: "v2.30.0", draft: true, prerelease: false },
@@ -120,8 +121,10 @@ test("resolveVersion accepts a leading v on a major pin", async t => {
 });
 
 test("resolveVersion never resolves a major pin to a higher major", async t => {
+  // The fixture has higher majors (v3.0.0 and v10.0.0); a "2" pin must stay on
+  // major 2, never the highest available overall.
   const result = await resolveVersion("2", "", fakeReleasesOctokit(releaseFixture));
-  t.false(result.startsWith("3."));
+  t.is(result.split(".")[0], "2");
 });
 
 test("resolveVersion excludes pre-releases and drafts from a major pin", async t => {
