@@ -52,6 +52,9 @@ jobs:
           import os, sys
           expected = os.environ["KOSLI_VERSION_EXPECTED"].strip()
           installed = os.environ["KOSLI_VERSION_INSTALLED"].strip().splitlines()[0].strip()
+          # `kosli version --short` prints a leading "v" (e.g. v2.11.27); normalise it.
+          if installed.startswith("v"):
+              installed = installed[1:]
           # Exact pin: installed must equal it. Major/minor pin (e.g. "2" or "2.11"):
           # installed must sit inside that line, which also proves we never crossed
           # into a higher major.
