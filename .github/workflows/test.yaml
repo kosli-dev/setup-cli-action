@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        version: [2.11.27, latest]
+        version: ["2.11.27", "2", "2.11", "latest"]
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -49,10 +49,19 @@ jobs:
         env:
           KOSLI_VERSION_EXPECTED: ${{ matrix.version }}
         run: |
-          import sys, os
-          sys.exit(
-              int(not os.environ["KOSLI_VERSION_EXPECTED"] in os.environ["KOSLI_VERSION_INSTALLED"])
-          )
+          import os, sys
+          expected = os.environ["KOSLI_VERSION_EXPECTED"].strip()
+          installed = os.environ["KOSLI_VERSION_INSTALLED"].strip().splitlines()[0].strip()
+          # `kosli version --short` prints a leading "v" (e.g. v2.11.27); normalise it.
+          if installed.startswith("v"):
+              installed = installed[1:]
+          # Exact pin: installed must equal it. Major/minor pin (e.g. "2" or "2.11"):
+          # installed must sit inside that line, which also proves we never crossed
+          # into a higher major.
+          ok = installed == expected or installed.startswith(expected + ".")
+          if not ok:
+              print(f"expected version {expected!r}, but installed {installed!r}")
+              sys.exit(1)
 
       - name: Verify latest resolved to a semver
         if: matrix.version == 'latest'
