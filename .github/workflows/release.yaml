@@ -46,12 +46,6 @@ jobs:
       - name: Install deps and build
         run: npm ci && npm run build
 
-      - name: Create GitHub Release with auto-generated notes
-        uses: softprops/action-gh-release@v3
-        with:
-          generate_release_notes: true
-          prerelease: ${{ steps.meta.outputs.prerelease }}
-
       # Stable releases: build-and-tag-action pushes dist/ to the tag
       # AND updates the rolling v<major> and v<major>.<minor> refs.
       - name: Build and tag (stable releases)
@@ -75,6 +69,12 @@ jobs:
           git commit -m "build: dist for ${TAG}"
           git tag -f "${TAG}"
           git push origin -f "refs/tags/${TAG}"
+
+      - name: Create GitHub Release with auto-generated notes
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          prerelease: ${{ steps.meta.outputs.prerelease }}
 
   notify-finish:
     needs: [notify-start, release]
