@@ -11,12 +11,10 @@ async function setup() {
     const platform = os.platform();
     const arch = os.arch();
 
-    const resolvedVersion = version === "latest"
-      ? await withRetries(
-          () => resolveVersion(version, token),
-          { onRetry: logRetry("resolving latest version") }
-        )
-      : version;
+    const resolvedVersion = await withRetries(
+      () => resolveVersion(version, token),
+      { onRetry: logRetry(`resolving Kosli CLI version "${version}"`) }
+    );
 
     let pathToCLI = tc.find("kosli", resolvedVersion);
     if (!pathToCLI) {
