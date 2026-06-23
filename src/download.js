@@ -22,10 +22,49 @@ function mapOS(os) {
   return mappings[os] || os;
 }
 
-export function getDownloadUrl({ version, platform, arch }) {
-  const filename = `kosli_${version}_${mapOS(platform)}_${mapArch(arch)}`;
+// Name of the release asset for a given version/platform/arch, e.g.
+// "kosli_2.11.43_linux_amd64.tar.gz". This is also the filename used to look the
+// asset up in the release's checksums.txt, so it is the single source of truth.
+export function getAssetFilename({ version, platform, arch }) {
   const extension = platform === "win32" ? "zip" : "tar.gz";
-  return `https://github.com/kosli-dev/cli/releases/download/v${version}/${filename}.${extension}`;
+  return `kosli_${version}_${mapOS(platform)}_${mapArch(arch)}.${extension}`;
+}
+
+export function getDownloadUrl({ version, platform, arch }) {
+  const filename = getAssetFilename({ version, platform, arch });
+  return `https://github.com/kosli-dev/cli/releases/download/v${version}/${filename}`;
+}
+
+// URL of the SHA-256 checksums file published alongside each release.
+export function getChecksumsUrl(version) {
+  return `https://github.com/kosli-dev/cli/releases/download/v${version}/kosli_${version}_checksums.txt`;
+}
+
+// Verify that `actualHex` matches the digest recorded for `assetFilename` in a
+// goreleaser-style checksums file (lines of "<sha256>  <filename>"). Throws if the
+// asset is not listed or the digest differs. Comparison is case-insensitive.
+export function verifyChecksum(actualHex, checksumsText, assetFilename) {
+  let expected = null;
+  for (const line of checksumsText.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+    const parts = trimmed.split(/\s+/);
+    const name = parts[parts.length - 1];
+    if (name === assetFilename) {
+      expected = parts[0];
+      break;
+    }
+  }
+  if (expected === null) {
+    throw new Error(`checksums file does not list an entry for "${assetFilename}"`);
+  }
+  if (expected.toLowerCase() !== actualHex.toLowerCase()) {
+    throw new Error(
+      `checksum mismatch for "${assetFilename}": expected ${expected.toLowerCase()}, got ${actualHex.toLowerCase()}`
+    );
+  }
 }
 
 // Classify the `version` input:
@@ -92,8 +131,14 @@ function highestStableRelease(releases, major, minor) {
 export async function resolveVersion(version, token, octokit) {
   const spec = classifyVersion(version);
 
-  // A full semver or any literal tag is used exactly as given, with no API call.
-  if (spec.kind === "exact" || spec.kind === "literal") {
+  // A full semver is used as-is (no API call), but with any leading "v" stripped so
+  // the resolved value is a bare "x.y.z" like the latest/partial paths produce.
+  if (spec.kind === "exact") {
+    return version.replace(/^v/, "");
+  }
+
+  // Any other literal tag (e.g. "Latest") is used exactly as given, no API call.
+  if (spec.kind === "literal") {
     return version;
   }
 

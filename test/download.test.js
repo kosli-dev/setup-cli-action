@@ -1,5 +1,11 @@
 import test from "ava";
-import { getDownloadUrl, resolveVersion } from "../src/download.js";
+import {
+  getAssetFilename,
+  getChecksumsUrl,
+  getDownloadUrl,
+  resolveVersion,
+  verifyChecksum
+} from "../src/download.js";
 
 const baseUrl = "https://github.com/kosli-dev/cli/releases/download/";
 const testCases = [
@@ -168,4 +174,78 @@ test("resolveVersion surfaces a descriptive error when listing releases fails", 
   await t.throwsAsync(resolveVersion("2", "", octokit), {
     message: /failed to resolve Kosli CLI version "2".*rate limit/
   });
+});
+
+// --- leading "v" on an exact pin ---
+
+test("resolveVersion strips a leading v from an exact semver pin", async t => {
+  // No octokit/token needed: an exact pin must not hit the API.
+  t.is(await resolveVersion("v2.11.43", "token-unused"), "2.11.43");
+});
+
+test("resolveVersion leaves an unprefixed exact semver unchanged", async t => {
+  t.is(await resolveVersion("2.11.43", "token-unused"), "2.11.43");
+});
+
+// --- asset filename / checksums url ---
+
+test("getAssetFilename renders the tar.gz asset name on linux", t => {
+  t.is(getAssetFilename({ version: "2.11.43", platform: "linux", arch: "x64" }), "kosli_2.11.43_linux_amd64.tar.gz");
+});
+
+test("getAssetFilename renders the zip asset name on windows", t => {
+  t.is(getAssetFilename({ version: "2.11.43", platform: "win32", arch: "amd64" }), "kosli_2.11.43_windows_amd64.zip");
+});
+
+test("getAssetFilename renders the darwin arm64 asset name", t => {
+  t.is(getAssetFilename({ version: "2.11.43", platform: "darwin", arch: "arm64" }), "kosli_2.11.43_darwin_arm64.tar.gz");
+});
+
+test("getChecksumsUrl points at the release's checksums file", t => {
+  t.is(
+    getChecksumsUrl("2.11.43"),
+    "https://github.com/kosli-dev/cli/releases/download/v2.11.43/kosli_2.11.43_checksums.txt"
+  );
+});
+
+// --- verifyChecksum ---
+
+const checksumsFixture = [
+  "aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111  kosli_2.11.43_linux_amd64.tar.gz",
+  "bbbb2222bbbb2222bbbb2222bbbb2222bbbb2222bbbb2222bbbb2222bbbb2222  kosli_2.11.43_windows_amd64.zip",
+  ""
+].join("\n");
+
+test("verifyChecksum passes when the digest matches", t => {
+  t.notThrows(() =>
+    verifyChecksum(
+      "aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111aaaa1111",
+      checksumsFixture,
+      "kosli_2.11.43_linux_amd64.tar.gz"
+    )
+  );
+});
+
+test("verifyChecksum matches case-insensitively", t => {
+  t.notThrows(() =>
+    verifyChecksum(
+      "AAAA1111AAAA1111AAAA1111AAAA1111AAAA1111AAAA1111AAAA1111AAAA1111",
+      checksumsFixture,
+      "kosli_2.11.43_linux_amd64.tar.gz"
+    )
+  );
+});
+
+test("verifyChecksum throws on a digest mismatch", t => {
+  const err = t.throws(() =>
+    verifyChecksum("deadbeef", checksumsFixture, "kosli_2.11.43_linux_amd64.tar.gz")
+  );
+  t.regex(err.message, /checksum mismatch for "kosli_2\.11\.43_linux_amd64\.tar\.gz"/);
+});
+
+test("verifyChecksum throws when the asset is not listed", t => {
+  const err = t.throws(() =>
+    verifyChecksum("aaaa1111", checksumsFixture, "kosli_2.11.43_linux_arm64.tar.gz")
+  );
+  t.regex(err.message, /does not list an entry for "kosli_2\.11\.43_linux_arm64\.tar\.gz"/);
 });
