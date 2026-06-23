@@ -15,6 +15,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   notify-start:
     runs-on: ubuntu-latest
@@ -35,6 +39,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}     # immutable; build-and-tag moves the tag later
           fetch-depth: 0
 
       - name: Setup Node.js
