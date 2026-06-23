@@ -33,7 +33,7 @@ jobs:
         run: echo "prerelease=${{ contains(github.ref_name, '-') }}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
