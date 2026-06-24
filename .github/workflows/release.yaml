@@ -75,10 +75,20 @@ jobs:
           git tag -f "${TAG}"
           git push origin -f "refs/tags/${TAG}"
 
+      - name: Find previous release tag
+        id: prev
+        run: |
+          prev=$(git tag --list 'v*.*.*' --sort=-v:refname \
+                  | grep -v -- '-' \
+                  | grep -vx "${{ github.ref_name }}" \
+                  | head -1)
+          echo "tag=$prev" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release with auto-generated notes
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
+          previous_tag: ${{ steps.prev.outputs.tag }} # bypasses broken ancestry
           prerelease: ${{ steps.meta.outputs.prerelease }}
 
   notify-finish:
