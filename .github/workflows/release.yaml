@@ -37,7 +37,7 @@ jobs:
         run: echo "prerelease=${{ contains(github.ref_name, '-') }}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.sha }}     # immutable; build-and-tag moves the tag later
           fetch-depth: 0
