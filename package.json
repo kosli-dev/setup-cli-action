@@ -24,7 +24,7 @@
     "@actions/tool-cache": "^4.0.0"
   },
   "devDependencies": {
-    "ava": "^8.0.1"
+    "ava": "^8.0.2"
   },
   "directories": {
     "test": "test"
