@@ -9,6 +9,22 @@ inputs:
     description: Token used to authenticate GitHub API calls when resolving `latest` or a major/minor pin.
     required: false
     default: ${{ github.token }}
+  attest-docker-artifact:
+    description: When true (Linux runners only), install shims for docker/buildx so any image pushed by a subsequent step is automatically attested to Kosli with `kosli attest artifact --artifact-type=oci`. This action must run before the step that builds or pushes.
+    required: false
+    default: "false"
+  artifact-name:
+    description: Kosli template artifact name used for every auto-attested image. Leave empty (the default) to derive the name from each image ref, which is what makes monorepos work.
+    required: false
+    default: ""
+  attest-flags:
+    description: Extra flags appended verbatim to every `kosli attest artifact` call made by the docker shim (e.g. `--annotate key=value`).
+    required: false
+    default: ""
+  fail-on-attest-error:
+    description: When true, a failed auto-attestation fails the step that pushed the image. Default is to warn and continue, keeping pushes non-blocking.
+    required: false
+    default: "false"
 outputs:
   version:
     description: The resolved Kosli CLI version that was installed.

@@ -1,10 +1,12 @@
 import os from "os";
 import crypto from "crypto";
 import fs from "fs";
+import path from "path";
 import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
 import { getAssetFilename, getChecksumsUrl, getDownloadUrl, resolveVersion, verifyChecksum } from "./download.js";
 import { withRetries } from "./retry.js";
+import { installDockerShims } from "./wrapDocker.js";
 
 async function setup() {
   try {
@@ -36,6 +38,15 @@ async function setup() {
     core.addPath(pathToCLI);
     core.setOutput("version", resolvedVersion);
     console.log(`installed Kosli CLI v${resolvedVersion} to ${pathToCLI}`);
+
+    if (core.getBooleanInput("attest-docker-artifact")) {
+      await installDockerShims({
+        kosliBin: path.join(pathToCLI, "kosli"),
+        artifactName: core.getInput("artifact-name"),
+        attestFlags: core.getInput("attest-flags"),
+        failOnAttestError: core.getBooleanInput("fail-on-attest-error")
+      });
+    }
   } catch (e) {
     core.setFailed(e);
   }

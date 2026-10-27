@@ -66,6 +66,79 @@ steps:
     version: latest
 ```
 
+## Automatically attest pushed Docker images
+
+On Linux runners the action can attest Docker images to Kosli automatically, with no
+explicit `kosli attest artifact` step. Set `attest-docker-artifact: true` and the action
+installs shims for `docker`, `buildx`, and `docker-buildx` that shadow the real binaries
+in subsequent steps. Whenever a later step pushes an image — `docker push`,
+`docker build --push`, `docker buildx build --push`, or a standalone `buildx build --push`
+— the shim runs
+
+```
+kosli attest artifact "<ref>" --artifact-type=oci --name "<name>"
+```
+
+for each pushed tag, after the push succeeds. `--artifact-type=oci` fingerprints the
+image directly from the registry, so this works with buildx's default `docker-container`
+driver, where the pushed image never enters the local image store.
+
+```yaml
+env:
+  KOSLI_API_TOKEN: ${{ secrets.KOSLI_API_TOKEN }}
+  KOSLI_ORG: my-org
+  KOSLI_FLOW: my-flow
+  KOSLI_TRAIL: ${{ github.sha }}
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup kosli           # must run BEFORE the build/push step
+        uses: kosli-dev/setup-cli-action@v5
+        with:
+          attest-docker-artifact: true
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: my-registry/my-image:${{ github.sha }}
+      # no explicit attest step - the push is attested automatically
+```
+
+> **Ordering matters.** The shims are added to the `PATH` of *subsequent* steps, so this
+> action must run before the step that builds or pushes.
+
+By default the Kosli artifact `--name` is derived from each image ref (strip any digest,
+take the last `/`-segment, strip the tag): `my-registry/my-image:1.2.3` → `my-image`.
+That per-image default is what makes monorepos work — each image gets its own name. If
+your Kosli flow template uses a different artifact name, set `artifact-name` (it applies
+to every image pushed in the job, so it is intended for single-artifact repos).
+
+The shim reads the usual `KOSLI_API_TOKEN` / `KOSLI_ORG` / `KOSLI_FLOW` / `KOSLI_TRAIL` /
+`KOSLI_HOST` environment variables, and the CLI auto-detects `--commit`, `--build-url`,
+etc. on GitHub Actions. `KOSLI_DRY_RUN` also flows through unchanged.
+
+A failed attestation does not fail the push by default — it prints a warning and
+continues. Set `fail-on-attest-error: true` to make it fail the step instead. A failed
+`docker`/`buildx` command is never masked: its exit code is always propagated and nothing
+is attested.
+
+### Limitations
+
+- Linux runners only; on other platforms the input is ignored with a warning.
+- Only invocations that resolve the shimmed binaries via `PATH` are intercepted; tools
+  that call docker/buildx by absolute path bypass the shims.
+- `docker push --all-tags` is skipped (the pushed tag set is not knowable from the
+  command line); a warning is printed.
+- `attest-flags` is split on whitespace; flag values containing spaces are not supported.
+- `docker buildx bake --push` and `docker compose push` are not intercepted.
+- Shim and attestation output goes to stderr (so `$(docker push -q ...)` captures stay
+  clean), and appears as plain log lines rather than GitHub annotations.
+
 ## Inputs
 
 The action supports the following inputs:
@@ -80,6 +153,15 @@ The action supports the following inputs:
   Quote partial versions (see the note above). Defaults to `latest`.
 - `github-token`: Token used to authenticate the GitHub API calls that resolve `latest` or a
   major/minor pin. Defaults to `${{ github.token }}`; normally you do not need to set this.
+- `attest-docker-artifact`: When `true` (Linux runners only), install the docker/buildx shims
+  described above so images pushed by subsequent steps are attested automatically.
+  Defaults to `false`.
+- `artifact-name`: Kosli template artifact name used for every auto-attested image. Leave
+  empty (the default) to derive the name from each image ref.
+- `attest-flags`: Extra flags appended verbatim to every `kosli attest artifact` call made by
+  the shim, e.g. `--annotate key=value`.
+- `fail-on-attest-error`: When `true`, a failed auto-attestation fails the step that pushed
+  the image. Defaults to `false` (warn and continue).
 
 ## Outputs
 

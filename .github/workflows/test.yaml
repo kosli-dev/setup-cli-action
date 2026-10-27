@@ -78,3 +78,51 @@ jobs:
           if resolved not in installed:
               print(f"resolved {resolved!r} not found in installed {installed!r}")
               sys.exit(1)
+
+  attest-docker:
+    name: Attest docker artifact (integration)
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+    env:
+      KOSLI_ORG: dummy-org
+      KOSLI_FLOW: dummy-flow
+      KOSLI_TRAIL: dummy-trail
+      KOSLI_API_TOKEN: dummy-token
+      KOSLI_DRY_RUN: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install deps and build
+        run: npm ci && npm run build
+
+      - name: Setup kosli CLI with docker attestation
+        uses: ./
+        with:
+          attest-docker-artifact: true
+
+      - name: docker resolves to the shim
+        run: |
+          resolved=$(command -v docker)
+          [[ "$resolved" == "$RUNNER_TEMP"/kosli-docker-shim-*/docker ]] || { echo "docker is $resolved, not the shim"; exit 1; }
+
+      - name: docker push attests the pushed tag
+        run: |
+          docker build -f test/integration/Dockerfile -t localhost:5000/kosli-shim-it:push .
+          docker push localhost:5000/kosli-shim-it:push 2>&1 | tee push.log
+          grep -q "kosli-shim: attesting localhost:5000/kosli-shim-it:push as 'kosli-shim-it'" push.log
+          grep -q "kosli-shim: attested localhost:5000/kosli-shim-it:push" push.log
+
+      - name: docker buildx build --push attests the pushed tag
+        run: |
+          docker buildx build --push -t localhost:5000/kosli-shim-it:bx -f test/integration/Dockerfile . 2>&1 | tee bx.log
+          grep -q "kosli-shim: attested localhost:5000/kosli-shim-it:bx" bx.log
+
+      - name: a build without --push does not attest
+        run: |
+          docker build -t localhost:5000/kosli-shim-it:nopush -f test/integration/Dockerfile . 2>&1 | tee nopush.log
+          ! grep -q "kosli-shim: attest" nopush.log
