@@ -2,19 +2,24 @@ name: setup-kosli-cli
 description: Install the Kosli CLI on Github Actions runners
 inputs:
   version:
-    description: Version of Kosli CLI to install. Accepts a full semver (e.g. 2.11.43) used as-is, a major pin "2" or major.minor pin "2.11" resolved to the newest stable release in that line, or `latest`. Defaults to latest.
+    description: >-
+      Version of Kosli CLI to install. Accepts a full semver (e.g. 2.11.43) used
+      as-is, a major pin "2" or major.minor pin "2.11" resolved to the newest
+      stable release in that line, or `latest`. Defaults to latest.
     required: false
     default: latest
   github-token:
-    description: Token used to authenticate GitHub API calls when resolving `latest` or a major/minor pin.
+    description: >-
+      Token used to authenticate GitHub API calls when resolving `latest` or a
+      major/minor pin.
     required: false
     default: ${{ github.token }}
 outputs:
   version:
     description: The resolved Kosli CLI version that was installed.
 branding:
-  icon: 'download-cloud'
-  color: 'blue'
+  icon: download-cloud
+  color: blue
 runs:
   using: node24
-  main: src/index.js
+  main: dist/index.js
